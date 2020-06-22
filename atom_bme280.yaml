@@ -1,0 +1,5 @@
+substitutions:
+  devicename: atom_bme280
+  upper_devicename: "Atom BME280"
+
+<<: !include atom_bme280_common.yaml

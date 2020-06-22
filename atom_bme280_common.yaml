@@ -1,0 +1,95 @@
+esphome:
+  name: $devicename
+  platform: ESP32
+  board: m5stack-core-esp32
+  platformio_options:
+    #upload_speed: 115200
+    upload_speed: 1500000
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_pw
+  domain: .jonn26.lan
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: !secret esphome_rest_pw
+
+ota:
+  password: !secret esphome_ota_pw
+
+i2c:
+# bme280
+   - id: grove
+     sda: GPIO26
+     scl: GPIO32
+     scan: True
+
+sensor:
+  - platform: uptime
+    name: "$upper_devicename Uptime"
+
+  - platform: bme280
+    temperature:
+      name: $upper_devicename Temperature
+      oversampling: 1x
+      id: bme_temp
+    humidity:
+      name: "$upper_devicename Humidity"
+      oversampling: 1x
+      id: bme_hum
+    pressure:
+      name: $upper_devicename Pressure
+      oversampling: 1x
+      id: bme_pres
+    address: 0x76
+    update_interval: 60s
+
+binary_sensor:
+  - platform: status
+    name: $upper_devicename Status
+    on_press:
+      then:
+        - light.turn_on:
+            id: status_led
+            effect: blink_green
+    on_release:
+      then:
+        - light.turn_on:
+            id: status_led
+            effect: blink_red
+
+light:
+  - platform: neopixelbus
+    type: GRB
+    pin: GPIO27
+    num_leds: 1
+    name: $upper_devicename Status LED
+    id: status_led
+    restore_mode: ALWAYS_OFF
+    effects:
+      - strobe:
+          name: blink_green
+          colors:
+            - state: True
+              brightness: 20%
+              red: 0%
+              green: 100%
+              blue: 0%
+              duration: 100ms
+            - state: False
+              duration: 5s
+      - strobe:
+          name: blink_red
+          colors:
+            - state: True
+              brightness: 20%
+              red: 100%
+              green: 0%
+              blue: 0%
+              duration: 100ms
+            - state: False
+              duration: 5s
